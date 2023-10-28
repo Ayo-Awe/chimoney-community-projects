@@ -1,27 +1,56 @@
 const { AuthKeyError, TypeError } = require("./Errors");
-const account = require("./modules/Account");
-const info = require("./modules/Info");
-const payouts = require("./modules/Payouts");
-const wallet = require("./modules/Wallet");
-const redeem = require("./modules/Redeem");
-const mobileMoney = require("./modules/MobileMoney");
-const subAccount = require("./modules/SubAccount");
+const Account = require("./modules/Account");
+const Info = require("./modules/Info");
+const Payouts = require("./modules/Payouts");
+const Wallet = require("./modules/Wallet");
+const Redeem = require("./modules/Redeem");
+const MobileMoney = require("./modules/MobileMoney");
+const SubAccount = require("./modules/SubAccount");
 
 /**
- * This function sets up the chimoneyjs modules using an optional key
- * @param {string?} apiKey Chi Money API key
+ * This function sets up the chimoneyjs modules using an optional key or options
+ * @param {string|Object?} options Chimoney API Key or Options
  * @returns The chimoneyjs Modules
  */
-module.exports = function (apiKey) {
-  if (apiKey) {
-    // apikey must be a string
-    if (typeof apiKey !== "string")
-      throw new TypeError("apikey must be of type string");
+module.exports = function (arg) {
+  const { apiKey, sandbox } = parseArgs(arg);
 
-    // Set CHIMONEY_API_KEY environment variable
-    process.env.CHIMONEY_API_KEY = apiKey;
+  if (!apiKey && !process.env.CHIMONEY_API_KEY) {
+    throw new AuthKeyError("Missing auth key");
   }
 
+  const moduleOptions = {
+    sandbox,
+    apiKey: apiKey || process.env.CHIMONEY_API_KEY,
+  };
+
   // Return modules
-  return { account, info, payouts, wallet, subAccount, redeem, mobileMoney };
+  return {
+    account: new Account(moduleOptions),
+    info: new Info(moduleOptions),
+    payouts: new Payouts(moduleOptions),
+    wallet: new Wallet(moduleOptions),
+    subAccount: new SubAccount(moduleOptions),
+    redeem: new Redeem(moduleOptions),
+    mobileMoney: new MobileMoney(moduleOptions),
+  };
 };
+
+function parseArgs(optionsOrAPIKey) {
+  if (typeof optionsOrAPIKey === "string") {
+    // args is an API Key
+    return { apiKey: optionsOrAPIKey };
+  } else if (typeof optionsOrAPIKey === "object") {
+    // args represents options i.e { sandbox: Boolean, apiKey: String }
+    const sandbox = optionsOrAPIKey.sandbox === true;
+    const apiKey = optionsOrAPIKey.apiKey;
+
+    if (apiKey && typeof apiKey !== "string") {
+      throw new TypeError("apiKey must be a string");
+    }
+
+    return { apiKey, sandbox };
+  }
+
+  return {};
+}
