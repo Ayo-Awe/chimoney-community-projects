@@ -17,7 +17,7 @@ const MAX_PAYOUT = 100;
 module.exports = (app) => {
   // Your code here
 
-  app.on("pull_request.closed", pullRequestClosedHandler);
+  app.on("pull_request.closed", pullRequestMergedHandler);
 
   commands(app, "payout", payoutCommandHandler);
 };
@@ -79,7 +79,9 @@ Chimoney GitHub bot.\nPlease, click on the payment link to complete the Payment 
   await addComment(context, message);
 }
 
-async function pullRequestClosedHandler(context) {
+async function pullRequestMergedHandler(context) {
+  if (!context.payload.pull_request.merged) return;
+
   const maintainer = await findMaintainer(context);
 
   if (!maintainer) {
