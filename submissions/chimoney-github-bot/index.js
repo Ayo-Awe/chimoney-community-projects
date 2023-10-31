@@ -73,7 +73,7 @@ async function payoutCommandHandler(context, command) {
     { valueInUSD: amount, email: recepientEmail },
   ]);
 
-  const message = `@${commenterUsername}, you have initiated a reward payment of $${amount} using the\
+  const message = `@${commenterUsername}, you have initiated a reward payment of $${amount} using the \
 Chimoney GitHub bot.\nPlease, click on the payment link to complete the Payment using Chimoney. ${response.data.paymentLink}`;
 
   await addComment(context, message);
