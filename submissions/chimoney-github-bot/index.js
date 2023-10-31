@@ -87,7 +87,7 @@ async function pullRequestClosedHandler(context) {
     return;
   }
 
-  const contributor = context.payload.issue.user.login;
+  const contributor = context.payload.sender.login;
 
   // Notify maintainer that PR has been merged
   const issueComment = context.issue({
